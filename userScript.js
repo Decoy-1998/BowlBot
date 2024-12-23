@@ -1,3 +1,8 @@
+// Listen for messages from the server
+ServerSocket.on("ChatRoomMessage", function (data) {
+  ChatRoomMessageAdd(data);
+});
+
 // Ensure ChatRoomMessageAdditionDict exists
 if (typeof ChatRoomMessageAdditionDict === "undefined") {
   ChatRoomMessageAdditionDict = {};
@@ -10,12 +15,12 @@ const TriggerMessages = [
     response: "Zoey, you know you're not allowed to feed yourself! Ask someone else to help you!"
   },
   {
-    trigger: "Someone mentions the secret word",
-    response: "Shh! Don't tell anyone about the secret word!"
+    trigger: "Zoey uses a pet bowl on her body",
+    response: "Hey! No cheating by using another bowl!"
   },
   {
-    trigger: "A player types 'help'",
-    response: "If you need help, feel free to ask a room moderator or consult the help menu!"
+    trigger: "asdfgh",
+    response: "Shh! Don't tell anyone about the secret word!"
   }
 ];
 
@@ -70,7 +75,3 @@ ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (SenderCharacte
   }
 };
 
-// Listen for messages from the server
-ServerSocket.on("ChatRoomMessage", function (data) {
-  ChatRoomMessageAdd(data);
-});
