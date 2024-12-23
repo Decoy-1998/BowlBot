@@ -56,11 +56,7 @@ function ChatRoomMessageAdd(data) {
 }
 
 // Add a custom handler to ChatRoomMessageAdditionDict
-ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (
-  SenderCharacter,
-  msg,
-  data
-) {
+ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (SenderCharacter, msg, data) {
   // Iterate through the trigger messages
   for (let i = 0; i < TriggerMessages.length; i++) {
     if (msg.includes(TriggerMessages[i].trigger)) {
