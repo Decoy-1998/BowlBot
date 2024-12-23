@@ -18,6 +18,18 @@ const TriggerMessages = [
     response: "If you need help, feel free to ask a room moderator or consult the help menu!"
   }
 ];
+//Takes player number - checks if here - reterns Char
+function charFromMemberNumber(MemberNumber) {
+  var char = null;
+  for (let C = 0; C < ChatRoomCharacter.length; C++) {
+    if (ChatRoomCharacter[C].MemberNumber == memberNumber) {
+      char = ChatRoomCharacter[C];
+      break;
+    }
+  }
+  return char
+}
+
 
 // Function to add messages to the chat
 function ChatRoomMessageAdd(data) {
@@ -55,6 +67,27 @@ function ChatRoomMessageAdd(data) {
   }
 }
 
+function getCharacterObject(char){
+  // If char is a number it gets processed to be transformed into a char
+  // If 0-9 it is assumed to be the position in the room.
+  // If >9 it is assumed to be the MemeberNumber
+  // If not a number it is returned as it is
+
+  if (isNaN(char)) {
+    return char
+  } else if (char <= 19) {
+    return ChatRoomCharacter[char]
+  } else {
+    for (var R = 0; R < ChatRoomCharacter.length; R++) {
+      if (ChatRoomCharacter[R].MemberNumber == char) {
+        return ChatRoomCharacter[R]
+      }
+    }
+  }
+}
+
+target = getCharacterObject(char)
+
 // Add a custom handler to ChatRoomMessageAdditionDict
 ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (
   SenderCharacter,
@@ -69,6 +102,7 @@ ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (
         Content: TriggerMessages[i].response,
         Type: "Chat",
       });
+        InventoryRemove(target,"ItemDevices")
       break; // Stop checking once a match is found
     }
   }
