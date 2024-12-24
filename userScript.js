@@ -1,77 +1,45 @@
-// Listen for messages from the server
-ServerSocket.on("ChatRoomMessage", function (data) {
-  ChatRoomMessageAdd(data);
+// Define the list of words or phrases to detect
+const targetWords = ["bowl", "raptor"];
+
+// Define the list of member numbers to listen for
+const targetMemberNumbers = [181599, 57941]; // Place these in the global or shared scope
+
+// Register the message handler
+ChatRoomRegisterMessageHandler({
+    Description: "Warn specific members mentioning restricted words",
+    Priority: 0,
+    Callback: (data, sender, msg, metadata) => {
+        console.log("Handler triggered", { data, sender, msg, metadata });
+
+        // Debug each key part individually
+        if (!msg) console.log("Message object is missing or null:", msg);
+        if (!data || !data.Sender) console.log("Data or Sender in Data is missing:", data);
+        if (!metadata || !metadata.senderName) console.log("Metadata or senderName is missing:", metadata);
+
+        // Return early if anything is invalid
+        if (!msg || !data || !data.Sender || !metadata || !metadata.senderName) {
+            console.log("One of the required components is missing or invalid.");
+            return;
+        }
+
+        // Check if the sender's MemberNumber is in the target list
+        if (targetMemberNumbers.includes(data.Sender)) {
+            console.log(`Sender ${metadata.senderName} is in the target list.`);
+
+            // Check if the message contains any of the target words
+            for (const word of targetWords) {
+                if (msg.toLowerCase().includes(word.toLowerCase())) {
+                    console.log(`Target word "${word}" found in message.`);
+                    
+                    // Send the warning response
+                    const response = `${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
+                    ChatRoomSendLocal(response);
+                    ChatRoomSendMessage({ Content: response, Type: "Chat" });
+                    break; // Stop after the first match
+                }
+            }
+        } else {
+            console.log(`Sender ${metadata.senderName} is NOT in the target list.`);
+        }
+    }
 });
-
-// Ensure ChatRoomMessageAdditionDict exists
-if (typeof ChatRoomMessageAdditionDict === "undefined") {
-  ChatRoomMessageAdditionDict = {};
-}
-
-// Define a list of trigger messages and their responses
-const TriggerMessages = [
-  {
-    trigger: "Zoey uses a Zoey's Bowl (pet bowl) on her body",
-    response: "Zoey, you know you're not allowed to feed yourself! Ask someone else to help you!"
-  },
-  {
-    trigger: "Zoey uses a pet bowl on her body",
-    response: "Hey! No cheating by using another bowl!"
-  },
-  {
-    trigger: "asdfgh",
-    response: "Shh! Don't tell anyone about the secret word!"
-  }
-];
-
-// Function to add messages to the chat
-function ChatRoomMessageAdd(data) {
-  // Make sure the message is valid (needs a Sender and Content)
-  if (
-    data != null &&
-    typeof data === "object" &&
-    data.Content != null &&
-    typeof data.Content === "string" &&
-    data.Content !== "" &&
-    data.Sender != null &&
-    typeof data.Sender === "number"
-  ) {
-    // Make sure the sender is in the room
-    var SenderCharacter = null;
-    for (var C = 0; C < ChatRoomCharacter.length; C++) {
-      if (ChatRoomCharacter[C].MemberNumber == data.Sender) {
-        SenderCharacter = ChatRoomCharacter[C];
-        break;
-      }
-    }
-
-    // If we found the sender
-    if (SenderCharacter != null) {
-      // Replace < and > characters to prevent HTML injections
-      var msg = data.Content;
-      while (msg.indexOf("<") > -1) msg = msg.replace("<", "&lt;");
-      while (msg.indexOf(">") > -1) msg = msg.replace(">", "&gt;");
-
-      // This part handles additional custom reactions to the message
-      for (var key in ChatRoomMessageAdditionDict) {
-        ChatRoomMessageAdditionDict[key](SenderCharacter, msg, data);
-      }
-    }
-  }
-}
-
-// Add a custom handler to ChatRoomMessageAdditionDict
-ChatRoomMessageAdditionDict["CustomMessageResponder"] = function (SenderCharacter, msg, data) {
-  // Iterate through the trigger messages
-  for (let i = 0; i < TriggerMessages.length; i++) {
-    if (msg.includes(TriggerMessages[i].trigger)) {
-      // Send the corresponding response to the chat room
-      ServerSend("ChatRoomChat", {
-        Content: TriggerMessages[i].response,
-        Type: "Chat",
-      });
-      break; // Stop checking once a match is found
-    }
-  }
-};
-
