@@ -11,11 +11,11 @@ function CustomChatRoomMessageListener(message) {
             // Customize the response based on the message type
             let response;
             if (message.Type === "Chat") {
-                response = `You said "${word}". Are you looking for help?`;
+                response = `You said a key word. Are you looking for help?`;
             } else if (message.Type === "Action") {
-                response = `I noticed your action involved "${word}".`;
+                response = `I noticed your action involved A key word.`;
             } else {
-                response = `Interesting! "${word}" was mentioned in a "${message.Type}" message.`;
+                response = `Interesting! A key word was mentioned in a "${message.Type}" message.`;
             }
 
             // Send the response message back to the chatroom
