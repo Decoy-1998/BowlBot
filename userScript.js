@@ -11,9 +11,9 @@ function CustomChatRoomMessageListener(message) {
             // Customize the response based on the message type
             let response;
             if (message.Type === "Chat") {
-                response = `You said a key word. Are you looking for help?`;
+                response = `I noticed your Chat involved A key word.`;
             } else if (message.Type === "Action") {
-                response = `I noticed your action involved A key word.`;
+                response = `I noticed your Action involved A key word.`;
             } else if (message.Type === "Activity") {
                 response = `I noticed your Activity involved A key word.`;
             } else if (message.Type === "Whisper") {
@@ -26,6 +26,8 @@ function CustomChatRoomMessageListener(message) {
                 response = `I noticed your Hidden involved A key word.`;
             } else if (message.Type === "Status") {
                 response = `I noticed your Status involved A key word.`;
+            } else if (message.Type === "NonDialogue") {
+                response = `I noticed your NonDialogue involved A key word.`;
             } else {
                 response = `Interesting! A key word was mentioned in a "${message.Type}" message.`;
             }
@@ -36,6 +38,7 @@ function CustomChatRoomMessageListener(message) {
 //Emote
 //Hidden
 //Status
+//NonDialogue
 
             // Send the response message back to the chatroom
             ChatRoomSendLocal(response);
