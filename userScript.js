@@ -1,56 +1,45 @@
-// Define a list of words or phrases to look for in messages or actions
-const targetWords = ["bowl", "qwerty"];
+// Define the list of words or phrases to detect
+const targetWords = ["bowl", "raptor"];
 
-// Hook into where messages and actions are received
-function CustomChatRoomMessageListener(message) {
-    if (!message || !message.Content || !message.Type) return;
+// Define the list of member numbers to listen for
+const targetMemberNumbers = [181599, 57941]; // Place these in the global or shared scope
 
-    // Check if the message or action contains any of the target words
-    for (const word of targetWords) {
-        if (message.Content.toLowerCase().includes(word.toLowerCase())) {
-            // Customize the response based on the message type
-            let response;
-            if (message.Type === "Chat") {
-                response = `I noticed your Chat involved A key word.`;
-            } else if (message.Type === "Action") {
-                response = `I noticed your Action involved A key word.`;
-            } else if (message.Type === "Activity") {
-                response = `I noticed your Activity involved A key word.`;
-            } else if (message.Type === "Whisper") {
-                response = `I noticed your Whisper involved A key word.`;
-            } else if (message.Type === "ServerMessage") {
-                response = `I noticed your ServerMessage involved A key word.`;
-            } else if (message.Type === "Emote") {
-                response = `I noticed your Emote involved A key word.`;
-            } else if (message.Type === "Hidden") {
-                response = `I noticed your Hidden involved A key word.`;
-            } else if (message.Type === "Status") {
-                response = `I noticed your Status involved A key word.`;
-            } else if (message.Type === "NonDialogue") {
-                response = `I noticed your NonDialogue involved A key word.`;
-            } else {
-                response = `Interesting! A key word was mentioned in a "${message.Type}" message.`;
+// Register the message handler
+ChatRoomRegisterMessageHandler({
+    Description: "Warn specific members mentioning restricted words",
+    Priority: 0,
+    Callback: (data, sender, msg, metadata) => {
+        console.log("Handler triggered", { data, sender, msg, metadata });
+
+        // Debug each key part individually
+        if (!msg) console.log("Message object is missing or null:", msg);
+        if (!data || !data.Sender) console.log("Data or Sender in Data is missing:", data);
+        if (!metadata || !metadata.senderName) console.log("Metadata or senderName is missing:", metadata);
+
+        // Return early if anything is invalid
+        if (!msg || !data || !data.Sender || !metadata || !metadata.senderName) {
+            console.log("One of the required components is missing or invalid.");
+            return;
+        }
+
+        // Check if the sender's MemberNumber is in the target list
+        if (targetMemberNumbers.includes(data.Sender)) {
+            console.log(`Sender ${metadata.senderName} is in the target list.`);
+
+            // Check if the message contains any of the target words
+            for (const word of targetWords) {
+                if (msg.toLowerCase().includes(word.toLowerCase())) {
+                    console.log(`Target word "${word}" found in message.`);
+                    
+                    // Send the warning response
+                    const response = `${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
+                    ChatRoomSendLocal(response);
+                    ChatRoomSendMessage({ Content: response, Type: "Chat" });
+                    break; // Stop after the first match
+                }
             }
-//Chat
-//Activity
-//Whisper
-//ServerMessage
-//Emote
-//Hidden
-//Status
-//NonDialogue
-
-            // Send the response message back to the chatroom
-            ChatRoomSendLocal(response);
-            ChatRoomSendMessage({ Content: response, Type: "Chat" });
-            break; // Stop checking after the first match
+        } else {
+            console.log(`Sender ${metadata.senderName} is NOT in the target list.`);
         }
     }
-}
-
-// Attach your custom listener to the existing chat handling
-const OriginalChatRoomMessageHandler = ChatRoomMessage;
-ChatRoomMessage = function (data) {
-    OriginalChatRoomMessageHandler(data); // Call the original handler
-    CustomChatRoomMessageListener(data); // Add your custom behavior
-};
+});
