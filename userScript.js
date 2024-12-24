@@ -6,7 +6,7 @@ const targetMemberNumbers = [181599, 57941]; // Place these in the global or sha
 
 // Register the message handler
 ChatRoomRegisterMessageHandler({
-    Description: "Warn specific members mentioning restricted words",
+    Description: "Warn specific members mentioning restricted words and remove item",
     Priority: 0,
     Callback: (data, sender, msg, metadata) => {
         console.log("Handler triggered", { data, sender, msg, metadata });
@@ -31,10 +31,13 @@ ChatRoomRegisterMessageHandler({
                 if (msg.toLowerCase().includes(word.toLowerCase())) {
                     console.log(`Target word "${word}" found in message.`);
                     
-                    // Send the warning response
+                    // Send the warning response via ChatRoomSendLocal
                     const response = `${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
                     ChatRoomSendLocal(response);
-                    ChatRoomSendMessage({ Content: response, Type: "Chat" });
+
+                    // Remove the item from the sender's inventory
+                    InventoryRemove(sender, "ItemDevices");
+
                     break; // Stop after the first match
                 }
             }
