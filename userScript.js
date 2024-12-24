@@ -1,5 +1,5 @@
 // Define the list of words or phrases to detect
-const targetWords = ["bowl", "raptor"];
+const targetWords = ["uses a pet bowl on her body.", "uses a Zoey's Bowl (pet bowl) on her body."];
 
 // Define the list of member numbers to listen for
 const targetMemberNumbers = [181599, 57941]; // Place these in the global or shared scope
