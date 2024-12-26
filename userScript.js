@@ -27,8 +27,9 @@ if (isNaN(parsed)) return ChatRoomSendLocal('Passed argument is wrong. Try again
 saveTargetList();
 ChatRoomSendLocal(`Successfully added ${parsed} to target list!`);
     }
-},
-{
+});
+
+CommandCombine({
 Tag: 'bb-remove',
     Description: ": To remove member from target list.",
     Action: (args) => {
@@ -39,8 +40,9 @@ if (isNaN(parsed)) return ChatRoomSendLocal('Passed argument is wrong. Try again
 saveTargetList();
 ChatRoomSendLocal(`Successfully removed ${parsed} from target list!`);
     }
-},
-{
+});
+
+CommandCombine({
 Tag: 'bb-list',
     Description: ": To remove member from target list.",
     Action: () => {
