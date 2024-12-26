@@ -1,50 +1,58 @@
-// Define the list of words or phrases to detect
-const targetWords = ["uses a pet bowl on her body.", "uses a pet bowl on his body.", "uses a Zoey's Bowl (pet bowl) on her body."];
+let targetMemberNumbers = loadTargetList() ?? [181599,119023];
 
-// Define the list of member numbers to listen for
-const targetMemberNumbers = [181599,119023]; // Place these in the global or shared scope
-
-// Register the message handler
 ChatRoomRegisterMessageHandler({
     Description: "Warn specific members mentioning restricted words and remove item",
     Priority: 0,
     Callback: (data, sender, msg, metadata) => {
-        console.log("Handler triggered", { data, sender, msg, metadata });
-        console.log({data})
-        console.log({sender})
-        console.log({msg})
-        console.log({metadata})
-        // Debug each key part individually
-        if (!msg) console.log("Message object is missing or null:", msg);
-        if (!data || !data.Sender) console.log("Data or Sender in Data is missing:", data);
-        if (!metadata || !metadata.senderName) console.log("Metadata or senderName is missing:", metadata);
+        if (data?.Content !== 'ActionUse') return;
+        if (!data?.Dictionary?.some(obj => obj.AssetName === 'PetBowl')) return;
+        if (metadata?.SourceCharacter?.MemberNumber !== metadata?.TargetCharacter?.MemberNumber) return;
+        if (!targetMemberNumbers.includes(data?.Sender)) return;
 
-        // Return early if anything is invalid
-        if (!msg || !data || !data.Sender || !metadata || !metadata.senderName) {
-            console.log("One of the required components is missing or invalid.");
-            return;
-        }
-
-        // Check if the sender's MemberNumber is in the target list
-        if (targetMemberNumbers.includes(data.Sender)) {
-            console.log(`Sender ${metadata.senderName} is in the target list.`);
-
-            // Check if the message contains any of the target words
-            for (const word of targetWords) {
-                if (msg.toLowerCase().includes(word.toLowerCase())) {
-                    console.log(`Target word "${word}" found in message.`);
-                    
-                    // Send the warning response to the person who triggered the event
-                    const response = `${metadata.TargetMemberNumber}, ${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
-                    ServerSend("ChatRoomChat", { Content: response, Type: "Chat"} );
-                    // Remove the item from the sender's inventory
-                    InventoryRemove(C, "ItemDevices", true); //TODO C = undefined
-
-                    break; // Stop after the first match
-                }
-            }
-        } else {
-            console.log(`Sender ${metadata.senderName} is NOT in the target list.`);
-        }
+          const response = `${metadata.TargetMemberNumber}, ${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
+          ServerSend("ChatRoomChat", { Content: response, Type: "Chat"} );
+        InventoryRemove(sender, "ItemDevices");
+        ChatRoomCharacterUpdate(sender);
     }
 });
+
+CommandCombine({
+    Tag: 'bb-add',
+    Description: ": To add member to target list.",
+    Action: (args) => {
+const parsed = parseInt(args);
+if (isNaN(parsed)) return ChatRoomSendLocal('Passed argument is wrong. Try again.');
+
+   targetMemberNumbers.push(parsed);
+saveTargetList();
+ChatRoomSendLocal(`Successfully added ${parsed} to target list!`);
+    }
+},
+{
+Tag: 'bb-remove',
+    Description: ": To remove member from target list.",
+    Action: (args) => {
+const parsed = parseInt(args);
+if (isNaN(parsed)) return ChatRoomSendLocal('Passed argument is wrong. Try again.');
+
+   targetMemberNumbers.filter(target => target !== parsed);
+saveTargetList();
+ChatRoomSendLocal(`Successfully removed ${parsed} from target list!`);
+    }
+},
+{
+Tag: 'bb-list',
+    Description: ": To remove member from target list.",
+    Action: () => {
+ChatRoomSendLocal(targetMemberNumbers.join(', '));
+    }
+});
+
+function saveTargetList() {
+const stringifiedTargets = JSON.stringify(targetMemberNumbers);
+localStorage.setItem('BowlBotTargets', stringifiedTargets);
+}
+
+function loadTargetList() {
+return JSON.parse(localStorage.getItem('BowlBotTargets'));
+}
