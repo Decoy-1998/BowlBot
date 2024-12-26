@@ -36,7 +36,7 @@ Tag: 'bb-remove',
 const parsed = parseInt(args);
 if (isNaN(parsed)) return ChatRoomSendLocal('Passed argument is wrong. Try again.');
 
-   targetMemberNumbers.filter(target => target !== parsed);
+   targetMemberNumbers = targetMemberNumbers.filter(target => target !== parsed);
 saveTargetList();
 ChatRoomSendLocal(`Successfully removed ${parsed} from target list!`);
     }
