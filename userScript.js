@@ -1,8 +1,8 @@
 // Define the list of words or phrases to detect
-const targetWords = ["uses a pet bowl on her body.", "uses a Zoey's Bowl (pet bowl) on her body."];
+const targetWords = ["uses a pet bowl on her body.", "uses a pet bowl on his body.", "uses a Zoey's Bowl (pet bowl) on her body."];
 
 // Define the list of member numbers to listen for
-const targetMemberNumbers = [181599, 57941]; // Place these in the global or shared scope
+const targetMemberNumbers = [181599,119023]; // Place these in the global or shared scope
 
 // Register the message handler
 ChatRoomRegisterMessageHandler({
@@ -10,7 +10,10 @@ ChatRoomRegisterMessageHandler({
     Priority: 0,
     Callback: (data, sender, msg, metadata) => {
         console.log("Handler triggered", { data, sender, msg, metadata });
-
+        console.log({data})
+        console.log({sender})
+        console.log({msg})
+        console.log({metadata})
         // Debug each key part individually
         if (!msg) console.log("Message object is missing or null:", msg);
         if (!data || !data.Sender) console.log("Data or Sender in Data is missing:", data);
@@ -31,12 +34,11 @@ ChatRoomRegisterMessageHandler({
                 if (msg.toLowerCase().includes(word.toLowerCase())) {
                     console.log(`Target word "${word}" found in message.`);
                     
-                    // Send the warning response via ChatRoomSendLocal
-                    const response = `${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
-                    ChatRoomSendLocal(response);
-
+                    // Send the warning response to the person who triggered the event
+                    const response = `${metadata.TargetMemberNumber}, ${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
+                    ServerSend("ChatRoomChat", { Content: response, Type: "Chat"} );
                     // Remove the item from the sender's inventory
-                    InventoryRemove(sender, "ItemDevices");
+                    InventoryRemove(C, "ItemDevices", true); //TODO C = undefined
 
                     break; // Stop after the first match
                 }
