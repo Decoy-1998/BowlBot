@@ -9,7 +9,7 @@ ChatRoomRegisterMessageHandler({
         if (metadata?.SourceCharacter?.MemberNumber !== metadata?.TargetCharacter?.MemberNumber) return;
         if (!targetMemberNumbers.includes(data?.Sender)) return;
 
-          const response = `${metadata.TargetMemberNumber}, ${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!`;
+          const response = `(${metadata.senderName}, you know you're not allowed to feed yourself! Ask someone else to help you!)`;
           ServerSend("ChatRoomChat", { Content: response, Type: "Chat"} );
         InventoryRemove(sender, "ItemDevices");
         ChatRoomCharacterUpdate(sender);
@@ -44,7 +44,7 @@ ChatRoomSendLocal(`Successfully removed ${parsed} from target list!`);
 
 CommandCombine({
 Tag: 'bb-list',
-    Description: ": To remove member from target list.",
+    Description: ": To show members on the target list",
     Action: () => {
 ChatRoomSendLocal(targetMemberNumbers.join(', '));
     }
